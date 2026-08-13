@@ -1,68 +1,84 @@
 <template>
-    <main class="the-agent-workspace">
-        <the-workspace-header />
-        <div class="workspace-content-nav-wrapper">
-            <the-workspace-nav />
-            <section class="workspace-content-wrapper">
-                <router-view class="workspace-content" />
-                <the-workspace-sidebar />
-                <the-task-dock-panel />
-            </section>
-        </div>
-        <the-notifications />
-    </main>
+	<main class="the-agent-workspace">
+		<the-workspace-header />
+		<div class="workspace-content-nav-wrapper">
+			<the-workspace-nav />
+			<section class="workspace-content-wrapper">
+				<router-view class="workspace-content" />
+				<the-workspace-sidebar />
+				<the-task-dock-panel v-if="!softphoneOnly" />
+			</section>
+		</div>
+		<the-notifications />
+		<!-- Floating softphone (pesoq-style), not the main workbench page -->
+		<div class="the-agent-workspace__phone-float">
+			<softphone-widget />
+		</div>
+	</main>
 </template>
 
-<script
-    setup
-    lang="ts"
->
+<script setup lang="ts">
 import TheWorkspaceHeader from '../../ui/header/components/the-workspace-header.vue';
 import TheWorkspaceNav from '../../ui/nav/components/the-workspace-nav.vue';
 import TheNotifications from '../../ui/notifications/components/the-notifications.vue';
 import { useSocketNotifications } from '../../ui/notifications/composables/useSocketNotifications';
+import SoftphoneWidget from '../../ui/softphone/components/softphone-widget.vue';
 import TheWorkspaceSidebar from '../../ui/sidebar/components/the-workspace-sidebar.vue';
 import TheTaskDockPanel from '../../ui/task-dock/components/the-task-dock-panel.vue';
+import { isAuthBypassEnabled } from '../scripts/authBypass';
 
-const { subscribeToWebSocketEvents } = useSocketNotifications();
+const softphoneOnly = isAuthBypassEnabled();
 
-subscribeToWebSocketEvents();
+if (!softphoneOnly) {
+	const { subscribeToWebSocketEvents } = useSocketNotifications();
+	subscribeToWebSocketEvents();
+}
 </script>
 
 <style scoped>
 .the-agent-workspace {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    background-color: var(--grey-lighten-4);
+	display: flex;
+	flex-direction: column;
+	height: 100vh;
+	background-color: var(--grey-lighten-4);
+	position: relative;
 }
 
 .workspace-content-nav-wrapper {
-    display: flex;
-    height: 100%;
-    min-height: 0;
+	display: flex;
+	height: 100%;
+	min-height: 0;
 }
 
 .workspace-content-wrapper {
-    position: relative;
-    /* task dock panel is absolute */
-    flex: 1;
-    display: flex;
-    gap: var(--spacing-sm);
+	position: relative;
+	flex: 1;
+	display: flex;
+	gap: var(--spacing-sm);
+	min-width: 0;
 
-    .the-task-dock-panel {
-        position: absolute;
-        right: 0;
-        bottom: 0;
-        left: 0;
-        z-index: 100;
-        pointer-events: none;
-    }
+	.the-task-dock-panel {
+		position: absolute;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		z-index: 100;
+		pointer-events: none;
+	}
 }
 
 .workspace-content {
-    flex: 1;
-    display: flex;
-    background-color: var(--white);
+	flex: 1;
+	display: flex;
+	background-color: var(--white);
+	min-width: 0;
+}
+
+.the-agent-workspace__phone-float {
+	position: fixed;
+	right: 1rem;
+	bottom: 1rem;
+	z-index: 200;
+	pointer-events: auto;
 }
 </style>

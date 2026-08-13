@@ -6,17 +6,20 @@
                     <wt-button icon="call" color="success" />
                 </router-link>
             </li>
-            <li>
-                <router-link to="/chats">
-                    <wt-button icon="chat" />
-                </router-link>
-            </li>
+			<li v-if="!softphoneOnly">
+				<router-link to="/chats">
+					<wt-button icon="chat" />
+				</router-link>
+			</li>
         </ul>
     </nav>
 </template>
 
 <script setup lang="ts">
 import { WtButton } from '@webitel/ui-sdk/components';
+import { isAuthBypassEnabled } from '../../../app/scripts/authBypass';
+
+const softphoneOnly = isAuthBypassEnabled();
 </script>
 
 <style scoped>

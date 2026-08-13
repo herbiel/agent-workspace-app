@@ -10,6 +10,7 @@ import AgentWorkspace from '../components/the-agent-workspace.vue';
 import TheCallsWorkspace from '../../ui/pages/modules/calls/components/the-calls-workspace.vue';
 import TheChatsWorkspace from '../../ui/pages/modules/chats/components/the-chats-workspace.vue';
 import TheChatWindow from '../../ui/pages/modules/chats/components/the-chat-window.vue';
+import { isAuthBypassEnabled } from '../scripts/authBypass';
 
 const routes: RouteRecordRaw[] = [
 	{
@@ -19,14 +20,17 @@ const routes: RouteRecordRaw[] = [
 		meta: {
 			WtApplication: WtApplication.Agent,
 		},
+		redirect: {
+			name: 'calls',
+		},
 		children: [
 			{
-				path: '/calls',
+				path: 'calls',
 				name: 'calls',
 				component: TheCallsWorkspace,
 			},
 			{
-				path: '/chats',
+				path: 'chats',
 				name: 'chats',
 				component: TheChatsWorkspace,
 				children: [
@@ -62,6 +66,10 @@ export const initRouter = async ({
 	});
 
 	router.beforeEach((to, _, next) => {
+		if (isAuthBypassEnabled()) {
+			return next();
+		}
+
 		if (!localStorage.getItem('access-token') && !to.query.accessToken) {
 			// @author @Lear24
 			// remove flag about shown notifications from localStorage
@@ -86,9 +94,11 @@ export const initRouter = async ({
 		next();
 	});
 
-	beforeEach.forEach((guard) => {
-		router.beforeEach(guard);
-	});
+	if (!isAuthBypassEnabled()) {
+		beforeEach.forEach((guard) => {
+			router.beforeEach(guard);
+		});
+	}
 
 	return router;
 };

@@ -13,10 +13,15 @@ import { createUserAccessControl } from './app/composables/useUserAccessControl'
 import { initRouter, router } from './app/router';
 import { initializeConfig } from './features/appConfig/config';
 import { useUserinfoStore } from './features/userinfo/stores/userinfoStore';
+import {
+	ensureDevAccessToken,
+	isAuthBypassEnabled,
+} from './app/scripts/authBypass';
 import { setTokenFromUrl } from './app/scripts/setTokenFromUrl';
 import { useWorkspaceStore } from './app/stores/workspace';
 
 setTokenFromUrl();
+ensureDevAccessToken();
 
 setApiServicesConfig({
 	eventBus,
@@ -42,17 +47,32 @@ const initApp = async () => {
 	const { initialize: initializeWorkspace } = useWorkspaceStore();
 	try {
 		await initializeConfig();
-		await initializeUserinfo();
+		if (!isAuthBypassEnabled()) {
+			await initializeUserinfo();
+		} else {
+			console.info('[app] VITE_SKIP_AUTH — skipping Webitel userinfo');
+		}
 		await initializeWorkspace();
-		createUserAccessControl(useUserinfoStore);
+		if (!isAuthBypassEnabled()) {
+			createUserAccessControl(useUserinfoStore);
+		}
 		await initRouter({
-			beforeEach: [
-				routeAccessGuard,
-			],
+			beforeEach: isAuthBypassEnabled()
+				? []
+				: [
+						routeAccessGuard,
+					],
 			onUnauthorized: clearStorageNotifications,
 		});
 	} catch (err) {
 		console.error('Error initializing app', err);
+		// Softphone lab: still mount UI even if Webitel bootstrap fails.
+		if (isAuthBypassEnabled() && !router) {
+			await initRouter({
+				beforeEach: [],
+				onUnauthorized: () => {},
+			});
+		}
 	}
 
 	app.use(router);

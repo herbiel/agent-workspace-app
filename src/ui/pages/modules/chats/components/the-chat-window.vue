@@ -17,13 +17,18 @@
     setup
     lang="ts"
 >
-import { mapMessagesToChatMessages } from '@webitel/ui-chats/adapters';
 import { ChatAction, ChatContainer } from '@webitel/ui-chats/ui';
-import type { ResultCallbacks } from '@webitel/ui-sdk/src/types';
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 
+import { mapMessagesToChatMessages } from '../../../../../features/chats/adapters/mapMessagesToChatMessages';
 import { useChatSessionStore } from '../../../../../features/chats/store/chat-session';
+
+type ResultCallbacks = {
+	onSuccess?: () => void;
+	onError?: (error: Error) => void;
+	onComplete?: () => void;
+};
 
 const route = useRoute();
 const threadId = computed(() => route.params.threadId as string);

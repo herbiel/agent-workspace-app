@@ -10,6 +10,11 @@ export default ({ mode }) => {
 
 	return defineConfig({
 		base: '/agent-workspace',
+		server: {
+			host: '0.0.0.0',
+			port: 5173,
+			strictPort: true,
+		},
 		build: {
 			sourcemap: isStagingEnv,
 			minify: !isStagingEnv, // Disable minification for readable debugging
