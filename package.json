@@ -41,7 +41,7 @@
 		"@pinia/testing": "^1.0.3",
 		"@playwright/test": "^1.55.1",
 		"@types/jssip": "^3.5.3",
-		"@types/node": "^25.9.2",
+		"@types/node": "^26.2.0",
 		"@vitejs/plugin-vue": "^6.x",
 		"@vue/test-utils": "^2.4.6",
 		"@vue/tsconfig": "^0.8.1",
